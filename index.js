@@ -85,6 +85,9 @@ const keys = {
   },
 };
 
+// tracking platform scrolling
+let scrollOffset = 0
+
 function animate() {
   requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -102,15 +105,19 @@ function animate() {
     // this is the point where we either move player to the max left or right, player actually stops moving and then
     // platforms/background moves to give illusion that player still moving
     if (keys.right.pressed) {
+      scrollOffset +=5
       platforms.forEach((platform) => {
         platform.position.x -= 5;
       });
     } else if (keys.left.pressed) {
+      scrollOffset -=5
       platforms.forEach((platform) => {
         platform.position.x += 5;
       });
     }
   }
+
+
   // rectangular collision detection (player/platform)
   platforms.forEach((platform) => {
     if (
@@ -123,9 +130,16 @@ function animate() {
       player.velocity.y = 0;
     }
   });
+
+  if (scrollOffset === 2000) {
+    console.log('You win');
+  }
 }
 
 animate();
+
+
+
 
 addEventListener("keydown", ({ keyCode }) => {
   switch (keyCode) {
