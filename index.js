@@ -1,11 +1,10 @@
-
 const canvas = document.querySelector("canvas");
 
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const gravity = .5
+const gravity = 0.5;
 
 class Player {
   constructor() {
@@ -28,104 +27,134 @@ class Player {
 
   update() {
     this.draw();
-    this.position.x += this.velocity.x
+    this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
 
-    if(this.position.y + this.height + this.velocity.y <= canvas.height){
-      this.velocity.y += gravity  
+    if (this.position.y + this.height + this.velocity.y <= canvas.height) {
+      this.velocity.y += gravity;
     } else {
-        this.velocity.y = 0
+      this.velocity.y = 0;
     }
-    
   }
 }
 
 class Platform {
-  constructor(){
+  constructor({x, y}) {
     this.position = {
-      x: 300,
-      y: 400
-    }
+      x,
+      y
+    };
 
-    this.width = 200
-    this.height = 20
+    this.width = 200;
+    this.height = 20;
   }
 
   draw() {
-    ctx.fillStyle = ('blue')
-    ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
+    ctx.fillStyle = "blue";
+    ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 }
-
-
 
 const player = new Player();
-const platform = new Platform()
+// const platform = new Platform()
+
+// let platforms = []
+
+// const createPlatforms = (n) => {
+//   for(let i=1; i<=n; i++){
+//     const xCoord = Math.floor(Math.random() * 800)
+//   const yCoord = Math.floor(Math.random() * 800)
+//     platforms.push(new Platform(xCoord, yCoord))
+//   }
+//   return platforms
+// }
+
+// createPlatforms(6)
+const platforms = [new Platform({
+  x: 200, y: 100
+}), new Platform({
+  x: 500, y: 300
+})];
 
 const keys = {
-    right: {
-        pressed: false
-    },
-    left: {
-        pressed: false
-    },
-}
+  right: {
+    pressed: false,
+  },
+  left: {
+    pressed: false,
+  },
+};
 
 function animate() {
- 
   requestAnimationFrame(animate);
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   player.update();
-  platform.draw()
+  platforms.forEach((platform) => {
+    platform.draw();
+  });
 
-  if (keys.right.pressed) {
-      player.velocity.x = 5
-  } else if (keys.left.pressed) {
-      player.velocity.x = -5
-  } else player.velocity.x = 0
-
-  // rectangular collision detection (player/platform)
-  if (player.position.y + player.height <= platform.position.y
-    && player.position.y + player.height + player.velocity.y >= platform.position.y 
-    && player.position.x + player.width >= platform.position.x 
-    && player.position.x <= platform.position.x + platform.width){
-    player.velocity.y = 0
+  if (keys.right.pressed && player.position.x < 400) {
+    player.velocity.x = 5;
+  } else if (keys.left.pressed && player.position.x > 100) {
+    player.velocity.x = -5;
+  } else {
+    player.velocity.x = 0;
+    // this is the point where we either move player to the max left or right, player actually stops moving and then
+    // platforms/background moves to give illusion that player still moving
+    if (keys.right.pressed) {
+      platforms.forEach((platform) => {
+        platform.position.x -= 5;
+      });
+    } else if (keys.left.pressed) {
+      platforms.forEach((platform) => {
+        platform.position.x += 5;
+      });
+    }
   }
-
+  // rectangular collision detection (player/platform)
+  platforms.forEach((platform) => {
+    if (
+      player.position.y + player.height <= platform.position.y &&
+      player.position.y + player.height + player.velocity.y >=
+        platform.position.y &&
+      player.position.x + player.width >= platform.position.x &&
+      player.position.x <= platform.position.x + platform.width
+    ) {
+      player.velocity.y = 0;
+    }
+  });
 }
 
 animate();
 
-addEventListener('keydown', ({keyCode}) => {
-    switch(keyCode){
-        case 65: // 'a' left
-         keys.left.pressed = true
-            break 
-        case 83: // 's' down
-            console.log('down');
-            break 
-        case 68: // 'd' right
-            keys.right.pressed = true
-            break 
-        case 87: // 'w' up
-            player.velocity.y -= 20
-            break 
-    }
-})
+addEventListener("keydown", ({ keyCode }) => {
+  switch (keyCode) {
+    case 65: // 'a' left
+      keys.left.pressed = true;
+      break;
+    case 83: // 's' down
+      break;
+    case 68: // 'd' right
+      keys.right.pressed = true;
+      break;
+    case 87: // 'w' up
+      player.velocity.y -= 20;
+      break;
+  }
+});
 
-addEventListener('keyup', ({keyCode}) => {
-    switch(keyCode){
-        case 65: // 'a' left
-        keys.left.pressed = false
-            break 
-        case 83: // 's' down
-            console.log('down');
-            break 
-        case 68: // 'd' right
-        keys.right.pressed = false
-            break 
-        case 87: // 'w' up
-            // player.velocity.y -= 20
-            break 
-    }
-})
+addEventListener("keyup", ({ keyCode }) => {
+  switch (keyCode) {
+    case 65: // 'a' left
+      keys.left.pressed = false;
+      break;
+    case 83: // 's' down
+      break;
+    case 68: // 'd' right
+      keys.right.pressed = false;
+      break;
+    case 87: // 'w' up
+      // player.velocity.y -= 20
+      break;
+  }
+});
